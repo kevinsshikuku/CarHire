@@ -1,0 +1,32 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: carhire-traccar-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: traccar
+      MARIADB_USER: traccar
+      MARIADB_PASSWORD: traccar
+      MARIADB_ROOT_PASSWORD: traccar_root
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  traccar:
+    image: traccar/traccar:latest
+    container_name: carhire-traccar
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    ports:
+      # Traccar web UI (restrict via firewall / VPN in production)
+      - "8082:8082"
+      # Wialon IPS (forwarding/retransmission)
+      - "5003:5003/tcp"
+    volumes:
+      - ./traccar.xml:/opt/traccar/conf/traccar.xml:ro
+      - traccar_logs:/opt/traccar/logs
+
+volumes:
+  mariadb_data:
+  traccar_logs:
+
